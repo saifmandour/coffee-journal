@@ -1,0 +1,20 @@
+# Notes for Claude Code: local only, not part of the site
+CLAUDE.md
+.claude/
+graphify-out/
+
+# Editors & OS clutter
+.vscode/
+.idea/
+*.swp
+.DS_Store
+Thumbs.db
+
+# Node & logs (the site has no dependencies, but just in case)
+node_modules/
+npm-debug.log*
+*.log
+
+# Secrets: never publish
+.env
+.env.*

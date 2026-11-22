@@ -24,40 +24,43 @@
   <main>
     <section id="view-brews">
       <h1 class="display">Brews</h1>
-      <p class="lede">Specialty coffee experiments: what went in, and how it tasted.</p>
+      <p class="lede">Specialty Coffee Brews</p>
       <ol class="brews" id="brews"></ol>
       <p class="empty" id="empty" hidden></p>
     </section>
 
     <section id="view-grinder" hidden>
       <h1 class="display">Grinder</h1>
-      <p class="lede">KINGrinder K6 clicks to burr travel to Comandante C40 clicks. Type in any field.</p>
+      <p class="lede">The same grind on a KINGrinder K6 and a Comandante C40. Type in either field.</p>
 
       <div class="card converter">
         <label class="field">K6 clicks
-          <input id="cv-k6" type="number" min="0" step="1" value="90" inputmode="decimal">
+          <input id="cv-k6" type="number" min="0" step="1" value="80" inputmode="numeric">
+          <span class="hint" id="cv-k6-um"></span>
         </label>
-        <span class="eq" aria-hidden="true">=</span>
-        <label class="field">Burr travel (µm)
-          <input id="cv-um" type="number" min="0" step="1" inputmode="decimal">
-        </label>
-        <span class="eq" aria-hidden="true">=</span>
+        <span class="eq" aria-hidden="true">≈</span>
         <label class="field">Comandante clicks
-          <input id="cv-c40" type="number" min="0" step="0.5" inputmode="decimal">
+          <input id="cv-c40" type="number" min="0" step="1" inputmode="numeric">
+          <span class="hint" id="cv-c40-um"></span>
         </label>
       </div>
 
       <div class="segmented" role="radiogroup" aria-label="Comandante version">
-        <label><input type="radio" name="c40" value="30" checked><span>Stock · 30 µm/click</span></label>
-        <label><input type="radio" name="c40" value="15"><span>Red Clix · 15 µm/click</span></label>
+        <label><input type="radio" name="c40" value="stock" checked><span>Stock C40</span></label>
+        <label><input type="radio" name="c40" value="redclix"><span>Red Clix</span></label>
       </div>
 
-      <p class="note" id="cv-ratio"></p>
+      <p class="note" id="cv-step"></p>
       <p class="note">
-        One K6 click moves the burrs about 16 µm. One Comandante click moves them about 30 µm, or 15 µm with Red Clix.
-        Both count from zero, the point where the burrs touch, so the same travel gives a similar gap.
-        This is the size of the gap, not the size of the grounds. The burrs are shaped differently,
-        so treat the result as a starting point and adjust by taste.
+        <strong>How it's built:</strong> my own taste notes say K6 80 is like Comandante 25, 100 like 28, and 110 like 30.
+        That's about 6 K6 clicks per Comandante click from 80 upward. Below 80 it runs straight to zero, where both sets of burrs touch,
+        so 3.2 K6 clicks per Comandante click. Published settings agree: Comandante's espresso range (7–13) lands at K6 22–42,
+        and its French press range (26–37) at K6 86–152, in line with K6 settings found online. Red Clix doubles the Comandante number.
+      </p>
+      <p class="note">
+        <strong>Microns:</strong> one K6 click moves the burrs 16 µm, and one Comandante click about 30 µm (15 µm with Red Clix).
+        The burrs are shaped differently, so the same movement doesn't give the same grind.
+        That's why the conversion comes from tasting rather than from microns.
       </p>
     </section>
   </main>
@@ -72,8 +75,11 @@
 
       <div class="sheet-body">
         <input type="hidden" name="id">
-        <label class="field wide">Coffee
+        <label class="field">Coffee
           <input name="coffee" required placeholder="Ethiopia Guji, washed" autocomplete="off">
+        </label>
+        <label class="field">Roaster
+          <input name="roaster" list="roasters" placeholder="Pick or type a new one" autocomplete="off">
         </label>
         <label class="field">Date
           <input name="date" type="date" required>
@@ -94,7 +100,14 @@
         <label class="field">Temperature (°C)
           <input name="temp" type="number" min="0" max="100" step="0.5" inputmode="decimal" placeholder="94">
         </label>
-        <label class="field">Grind (K6 clicks)
+        <div class="field wide" role="radiogroup" aria-labelledby="grinder-label">
+          <span id="grinder-label">Grinder</span>
+          <div class="segmented">
+            <label><input type="radio" name="grinder" value="k6" checked><span>KINGrinder K6</span></label>
+            <label><input type="radio" name="grinder" value="c40"><span>Comandante C40</span></label>
+          </div>
+        </div>
+        <label class="field">Grind (clicks)
           <input name="grind" type="number" min="0" step="1" inputmode="numeric" placeholder="80">
           <span class="hint" id="grind-hint"></span>
         </label>
@@ -114,16 +127,20 @@
     <option>V60</option><option>Kalita Wave</option><option>Chemex</option><option>Origami</option>
     <option>AeroPress</option><option>French Press</option><option>Espresso</option><option>Moka pot</option>
   </datalist>
+  <datalist id="roasters"></datalist> <!-- filled from roasters you've logged before -->
 
   <template id="brew-card">
     <li class="card brew">
       <div class="brew-head">
-        <h2 class="coffee"></h2>
+        <div>
+          <h2 class="coffee"></h2>
+          <p class="roaster"></p>
+        </div>
         <time class="date"></time>
       </div>
       <p class="method"></p>
       <dl class="stats">
-        <div><dt>Grind</dt><dd class="grind"></dd></div>
+        <div><dt class="grind-label">Grind</dt><dd class="grind"></dd></div>
         <div><dt>Temp</dt><dd class="temp"></dd></div>
         <div><dt>Dose</dt><dd class="dose"></dd></div>
         <div><dt>Time</dt><dd class="time"></dd></div>

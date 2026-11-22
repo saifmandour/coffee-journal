@@ -8,6 +8,7 @@
     "water": 250,
     "waterType": "Third Wave Water",
     "temp": 94,
+    "grinder": "k6",
     "grind": 80,
     "time": "2:45",
     "notes": "Example entry. Edit or delete it once you've logged a real brew."

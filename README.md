@@ -37,9 +37,11 @@ After editing online, run `git pull` before working locally.
 
 Live at **https://saifmandour.github.io/coffee-journal/**. The repo is public.
 
-1. **Turn on GitHub Pages, once:** repo → **Settings → Pages → Build and deployment → Source: Deploy from a branch → `main` / `(root)` → Save.**
-   The site goes live within a minute or two. `.nojekyll` makes GitHub serve the files exactly as they are.
-2. **Updates:** every push to `main`, and every brew saved online, republishes the site within about a minute.
+1. **Turn on GitHub Pages, once:** repo → **Settings → Pages → Build and deployment → Source: GitHub Actions.**
+2. **Deploys are automatic:** `.github/workflows/pages.yml` publishes the site on every push to `main`, and every brew
+   saved online is also a push. Progress is in the repo's **Actions** tab, and a deploy takes about a minute.
+   Only the website files are published. `server.js`, `package.json` and the README stay out. If you add a new file the
+   site needs, add it to the list in that workflow.
 
 ## On your phone
 

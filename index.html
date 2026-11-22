@@ -1,0 +1,136 @@
+<!doctype html>
+<html lang="en">
+<head>
+  <meta charset="utf-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1">
+  <meta name="color-scheme" content="light dark">
+  <title>Coffee Journal</title>
+  <link rel="icon" href="data:image/svg+xml,<svg xmlns='http://www.w3.org/2000/svg' viewBox='0 0 100 100'><text y='.9em' font-size='90'>☕</text></svg>">
+  <link rel="stylesheet" href="style.css">
+  <script src="app.js" defer></script>
+</head>
+<body>
+  <header class="bar">
+    <div class="bar-inner">
+      <span class="brand">Coffee Journal</span>
+      <nav class="segmented" aria-label="Sections">
+        <a href="#brews" data-view="brews">Brews</a>
+        <a href="#grinder" data-view="grinder">Grinder</a>
+      </nav>
+      <button class="btn primary" id="new-brew" hidden>New brew</button>
+    </div>
+  </header>
+
+  <main>
+    <section id="view-brews">
+      <h1 class="display">Brews</h1>
+      <p class="lede">Specialty coffee experiments: what went in, and how it tasted.</p>
+      <ol class="brews" id="brews"></ol>
+      <p class="empty" id="empty" hidden></p>
+    </section>
+
+    <section id="view-grinder" hidden>
+      <h1 class="display">Grinder</h1>
+      <p class="lede">KINGrinder K6 clicks to burr travel to Comandante C40 clicks. Type in any field.</p>
+
+      <div class="card converter">
+        <label class="field">K6 clicks
+          <input id="cv-k6" type="number" min="0" step="1" value="90" inputmode="decimal">
+        </label>
+        <span class="eq" aria-hidden="true">=</span>
+        <label class="field">Burr travel (µm)
+          <input id="cv-um" type="number" min="0" step="1" inputmode="decimal">
+        </label>
+        <span class="eq" aria-hidden="true">=</span>
+        <label class="field">Comandante clicks
+          <input id="cv-c40" type="number" min="0" step="0.5" inputmode="decimal">
+        </label>
+      </div>
+
+      <div class="segmented" role="radiogroup" aria-label="Comandante version">
+        <label><input type="radio" name="c40" value="30" checked><span>Stock · 30 µm/click</span></label>
+        <label><input type="radio" name="c40" value="15"><span>Red Clix · 15 µm/click</span></label>
+      </div>
+
+      <p class="note" id="cv-ratio"></p>
+      <p class="note">
+        One K6 click moves the burrs about 16 µm. One Comandante click moves them about 30 µm, or 15 µm with Red Clix.
+        Both count from zero, the point where the burrs touch, so the same travel gives a similar gap.
+        This is the size of the gap, not the size of the grounds. The burrs are shaped differently,
+        so treat the result as a starting point and adjust by taste.
+      </p>
+    </section>
+  </main>
+
+  <dialog class="sheet" id="sheet" aria-labelledby="sheet-title">
+    <form id="brew-form">
+      <header class="sheet-head">
+        <button type="button" class="btn plain" data-close>Cancel</button>
+        <h2 id="sheet-title">New brew</h2>
+        <button type="submit" class="btn plain strong">Save</button>
+      </header>
+
+      <div class="sheet-body">
+        <input type="hidden" name="id">
+        <label class="field wide">Coffee
+          <input name="coffee" required placeholder="Ethiopia Guji, washed" autocomplete="off">
+        </label>
+        <label class="field">Date
+          <input name="date" type="date" required>
+        </label>
+        <label class="field">Method
+          <input name="method" list="methods" placeholder="V60" autocomplete="off">
+        </label>
+        <label class="field">Dose (g)
+          <input name="dose" type="number" min="0" step="0.1" inputmode="decimal" placeholder="15">
+        </label>
+        <label class="field">Water (g)
+          <input name="water" type="number" min="0" step="1" inputmode="decimal" placeholder="250">
+          <span class="hint" id="ratio-hint"></span>
+        </label>
+        <label class="field">Water type
+          <input name="waterType" placeholder="Third Wave Water" autocomplete="off">
+        </label>
+        <label class="field">Temperature (°C)
+          <input name="temp" type="number" min="0" max="100" step="0.5" inputmode="decimal" placeholder="94">
+        </label>
+        <label class="field">Grind (K6 clicks)
+          <input name="grind" type="number" min="0" step="1" inputmode="numeric" placeholder="80">
+          <span class="hint" id="grind-hint"></span>
+        </label>
+        <label class="field">Time (m:ss)
+          <input name="time" pattern="\d{1,2}:[0-5]\d" placeholder="2:45" inputmode="numeric" autocomplete="off">
+        </label>
+        <label class="field wide">Description
+          <textarea name="notes" rows="4" placeholder="Bright, jammy, a little thin. Next time: one click finer."></textarea>
+        </label>
+        <p class="error wide" id="form-error" role="alert" hidden></p>
+        <button type="button" class="btn danger wide" id="delete" hidden>Delete brew</button>
+      </div>
+    </form>
+  </dialog>
+
+  <datalist id="methods">
+    <option>V60</option><option>Kalita Wave</option><option>Chemex</option><option>Origami</option>
+    <option>AeroPress</option><option>French Press</option><option>Espresso</option><option>Moka pot</option>
+  </datalist>
+
+  <template id="brew-card">
+    <li class="card brew">
+      <div class="brew-head">
+        <h2 class="coffee"></h2>
+        <time class="date"></time>
+      </div>
+      <p class="method"></p>
+      <dl class="stats">
+        <div><dt>Grind</dt><dd class="grind"></dd></div>
+        <div><dt>Temp</dt><dd class="temp"></dd></div>
+        <div><dt>Dose</dt><dd class="dose"></dd></div>
+        <div><dt>Time</dt><dd class="time"></dd></div>
+      </dl>
+      <p class="notes"></p>
+      <button class="btn plain edit" hidden>Edit</button>
+    </li>
+  </template>
+</body>
+</html>

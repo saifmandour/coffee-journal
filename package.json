@@ -1,0 +1,7 @@
+{
+  "name": "coffee-journal",
+  "private": true,
+  "scripts": {
+    "start": "node server.js"
+  }
+}

@@ -1,16 +1,17 @@
 [
   {
     "id": "example",
+    "coffee": "Indonesia",
+    "roaster": "Günter Coffee Roasters",
     "date": "2026-11-22",
-    "coffee": "Ethiopia Guji, washed",
-    "method": "V60",
-    "dose": 15,
-    "water": 250,
-    "waterType": "Third Wave Water",
+    "method": "V60 Switch",
+    "dose": 14,
+    "water": 200,
+    "waterType": "Bottled Water",
     "temp": 94,
     "grinder": "k6",
-    "grind": 80,
+    "grind": 105,
     "time": "2:45",
-    "notes": "Example entry. Edit or delete it once you've logged a real brew."
+    "notes": "sweet, bright, fruity \n\nEmi Fukahori method"
   }
 ]

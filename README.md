@@ -12,10 +12,41 @@ npm start   # then open http://localhost:8080
 On your own computer you get a **New brew** button. Entries are saved to `brews.json`.
 No dependencies are needed, only Node.
 
+## Edit from your phone or any browser
+
+Everyone sees the journal read-only. You sign in once per device at the private address
+**https://saifmandour.github.io/coffee-journal/#signin**. It isn't linked anywhere on the site. Bookmark it.
+
+You'll need a GitHub key (fine-grained personal access token):
+
+1. GitHub → **Settings → Developer settings → Personal access tokens → Fine-grained tokens → Generate new token**
+2. **Name:** `coffee-journal` · **Expiration:** your choice (e.g. 1 year)
+3. **Repository access:** *Only select repositories* → `coffee-journal`
+4. **Permissions → Repository permissions → Contents: Read and write.** Leave everything else alone.
+5. Generate it, and save the key in your password manager. GitHub shows it only once.
+
+Paste the key on the sign-in page. It stays in that browser, so you're signed in until you tap **Sign out**.
+Every save becomes a commit, and the public site updates in about a minute.
+
+**Security:** the site has no server or login form to attack. Saves go straight to GitHub, which checks the key every time.
+The key only works for this one repo, and you can cancel it on GitHub at any time, for example if you lose your phone.
+A security rule on the page only allows its own code and GitHub's API, which keeps injected scripts away from the key.
+After editing online, run `git pull` before working locally.
+
 ## Publish
 
-Push the repo to GitHub, then go to **Settings → Pages → Deploy from a branch → `main` / root**.
-The public site shows your brews read-only. To add more, run it locally, log the brew, then commit and push.
+Live at **https://saifmandour.github.io/coffee-journal/**. The repo is public.
+
+1. **Turn on GitHub Pages, once:** repo → **Settings → Pages → Build and deployment → Source: Deploy from a branch → `main` / `(root)` → Save.**
+   The site goes live within a minute or two. `.nojekyll` makes GitHub serve the files exactly as they are.
+2. **Updates:** every push to `main`, and every brew saved online, republishes the site within about a minute.
+
+## On your phone
+
+- **Install it:** open the site. On iPhone, tap Safari → Share → **Add to Home Screen**. On Android, tap Chrome → ⋮ → **Install app / Add to Home screen**.
+  You get the coffee-cup icon, and the site opens full-screen like an app.
+- **Sign in inside the installed app:** it has no address bar for `#signin`, so **press and hold the big page title** ("Brews") for a second.
+  On iPhone, the installed app keeps its own storage, separate from Safari, so you sign in once there as well.
 
 ## Grind conversion
 

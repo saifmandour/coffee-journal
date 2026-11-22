@@ -15,8 +15,9 @@ const TRAVEL_UM = { k6: 16, stock: 30, redclix: 15 };
 const $ = (sel, root = document) => root.querySelector(sel);
 const fmt = (n) => +n.toFixed(1);
 const today = () => new Date().toLocaleDateString('en-CA'); // YYYY-MM-DD, local time
-// Only the local server (npm start) can save. The public site is read-only.
-const editable = ['localhost', '127.0.0.1'].includes(location.hostname);
+// Who can edit: on your computer (npm start) the local server saves. On the public site, only someone
+// signed in with the GitHub key can, and visitors never see an edit button.
+const LOCAL = ['localhost', '127.0.0.1'].includes(location.hostname);
 
 const sheet = $('#sheet');
 const form = $('#brew-form');
@@ -89,7 +90,7 @@ function card(b) {
   $('.notes', li).textContent = b.notes || '';
 
   const edit = $('.edit', li);
-  edit.hidden = !editable;
+  edit.hidden = !canEdit();
   edit.addEventListener('click', () => openSheet(b));
   return li;
 }
@@ -100,13 +101,103 @@ const newestFirst = () => [...brews].reverse().sort((a, b) => b.date.localeCompa
 function render() {
   $('#brews').replaceChildren(...newestFirst().map(card));
   $('#empty').hidden = brews.length > 0;
-  $('#empty').textContent = editable ? 'No brews yet. Tap New brew to log your first one.' : 'No brews logged yet.';
+  $('#empty').textContent = canEdit() ? 'No brews yet. Tap New brew to log your first one.' : 'No brews logged yet.';
   // Roasters you've used before show up as suggestions in the Roaster field.
   const roasters = [...new Set(brews.map((b) => b.roaster).filter(Boolean))].sort((a, b) => a.localeCompare(b));
   $('#roasters').replaceChildren(...roasters.map((r) => new Option(r)));
 }
 
-// ---------- Add / edit sheet (local only) ----------
+// ---------- Owner sign-in (public site) ----------
+// Saves go straight to GitHub using a fine-grained key that can only write to this repo. The key stays
+// in this browser, and GitHub checks it on every save. There's no server here for bots to attack.
+const FILE_API = 'https://api.github.com/repos/saifmandour/coffee-journal/contents/brews.json';
+const KEY_STORE = 'coffee-journal:github-key';
+let githubKey = LOCAL ? null : localStorage.getItem(KEY_STORE);
+let fileSha = null; // GitHub's version id for brews.json. A save is refused if it changed elsewhere first.
+const canEdit = () => LOCAL || !!githubKey;
+
+const github = (key, options = {}) => fetch(FILE_API, {
+  ...options,
+  cache: 'no-store',
+  headers: { Accept: 'application/vnd.github+json', 'Content-Type': 'application/json', Authorization: `Bearer ${key}` },
+}).catch(() => null);
+const toBase64 = (text) => {
+  let bin = '';
+  for (const byte of new TextEncoder().encode(text)) bin += String.fromCharCode(byte);
+  return btoa(bin);
+};
+const fromBase64 = (b64) => new TextDecoder().decode(Uint8Array.from(atob(b64), (c) => c.charCodeAt(0)));
+
+// Signed in: read straight from GitHub, so you see your latest save before Pages republishes.
+async function loadBrews() {
+  if (githubKey) {
+    const res = await github(githubKey);
+    if (res?.ok) {
+      const file = await res.json();
+      fileSha = file.sha;
+      return JSON.parse(fromBase64(file.content));
+    }
+    if (res?.status === 401) signOut(); // key expired or revoked
+  }
+  const res = await fetch('brews.json', { cache: 'no-store' }).catch(() => null);
+  return res?.ok ? res.json() : [];
+}
+
+function applyEditMode() {
+  $('#new-brew').hidden = !canEdit();
+  $('#owner').hidden = !githubKey;
+  render();
+}
+function signOut() {
+  githubKey = null;
+  fileSha = null;
+  localStorage.removeItem(KEY_STORE);
+  applyEditMode();
+}
+
+const signin = $('#signin');
+const signinForm = $('#signin-form');
+function openSignin() {
+  signinForm.reset();
+  $('#signin-error').hidden = true;
+  signin.showModal();
+}
+signinForm.addEventListener('submit', async (e) => {
+  e.preventDefault();
+  const fail = (message) => { $('#signin-error').textContent = message; $('#signin-error').hidden = false; };
+  const key = signinForm.elements.key.value.trim();
+  const res = await busy(signinForm, () => github(key));
+  if (!res) return fail("Couldn't reach GitHub. Check your connection and try again.");
+  if (!res.ok) return fail("That key didn't work. Check you copied all of it and that it has access to coffee-journal.");
+  const file = await res.json();
+  githubKey = key;
+  localStorage.setItem(KEY_STORE, key);
+  fileSha = file.sha;
+  brews = JSON.parse(fromBase64(file.content));
+  applyEditMode();
+  signin.close();
+});
+// The installed phone app has no address bar for #signin, so: press and hold a page title for a second.
+// Not shown anywhere, and it does nothing without your key.
+document.querySelectorAll('.display').forEach((title) => {
+  let hold;
+  title.addEventListener('pointerdown', () => {
+    hold = setTimeout(() => { if (!LOCAL && !githubKey) openSignin(); }, 800);
+  });
+  for (const type of ['pointerup', 'pointerleave', 'pointercancel']) title.addEventListener(type, () => clearTimeout(hold));
+});
+$('#signout').addEventListener('click', () => {
+  if (confirm("Sign out on this device? You'll need your GitHub key to sign in again.")) signOut();
+});
+
+// Disable a form's Save button while it works, so a double-tap can't save twice.
+async function busy(formEl, work) {
+  const button = formEl.querySelector('[type=submit]');
+  button.disabled = true;
+  try { return await work(); } finally { button.disabled = false; }
+}
+
+// ---------- Add / edit sheet (owner only) ----------
 function updateHints() {
   const { dose, water, grind, grinder } = form.elements;
   $('#ratio-hint').textContent = dose.value > 0 && water.value > 0 ? `Ratio 1:${fmt(water.value / dose.value)}` : '';
@@ -124,14 +215,40 @@ function openSheet(brew) {
   sheet.showModal();
 }
 
-async function persist(next) {
+async function saveLocal(next) {
   const res = await fetch('brews.json', {
     method: 'PUT',
     headers: { 'Content-Type': 'application/json' },
     body: JSON.stringify(next),
   }).catch(() => null);
-  if (!res?.ok) {
-    $('#form-error').textContent = "Couldn't save. Is the local server running (npm start)?";
+  return res?.ok ? '' : "Couldn't save. Is the local server running (npm start)?";
+}
+
+async function saveToGitHub(next, message) {
+  const content = toBase64(JSON.stringify(next, null, 2) + '\n');
+  const res = await github(githubKey, { method: 'PUT', body: JSON.stringify({ message, content, sha: fileSha }) });
+  if (res?.ok) {
+    fileSha = (await res.json()).content.sha;
+    return '';
+  }
+  if (!res) return "Couldn't reach GitHub. Check your connection and try again.";
+  if (res.status === 401) {
+    signOut();
+    return 'Your GitHub key has expired or was revoked. Sign in again with a new one.';
+  }
+  if (res.status === 409 || res.status === 422) { // changed on another device since this page loaded
+    brews = await loadBrews();
+    render();
+    return 'The journal changed on another device. Reloaded the latest version, so press Save again.';
+  }
+  return "This key can't save to the journal. On GitHub, give it Contents: Read and write for coffee-journal.";
+}
+
+// Returns true when saved. On failure the sheet stays open with an explanation.
+async function persist(next, message) {
+  const error = LOCAL ? await saveLocal(next) : await saveToGitHub(next, message);
+  if (error) {
+    $('#form-error').textContent = error;
     $('#form-error').hidden = false;
     return false;
   }
@@ -146,24 +263,34 @@ form.addEventListener('submit', async (e) => {
   for (const [name, value] of new FormData(form)) {
     brew[name] = form.elements[name].type === 'number' ? (value === '' ? null : +value) : value.trim();
   }
+  const message = `${brew.id ? 'Edit' : 'Log'} brew: ${brew.coffee}`;
   brew.id ||= crypto.randomUUID();
-  if (await persist([...brews.filter((b) => b.id !== brew.id), brew])) sheet.close();
+  const saved = await busy(form, () => persist([...brews.filter((b) => b.id !== brew.id), brew], message));
+  if (saved) sheet.close();
 });
 
 $('#delete').addEventListener('click', async () => {
   if (!confirm("Delete this brew? This can't be undone.")) return;
-  if (await persist(brews.filter((b) => b.id !== form.elements.id.value))) sheet.close();
+  const { id, coffee } = form.elements;
+  const saved = await busy(form, () => persist(brews.filter((b) => b.id !== id.value), `Delete brew: ${coffee.value}`));
+  if (saved) sheet.close();
 });
 
 // New brews start from your latest recipe, since an experiment usually changes one thing.
 $('#new-brew').addEventListener('click', () => {
   openSheet({ ...newestFirst()[0], id: '', date: today(), notes: '' });
 });
-$('[data-close]').addEventListener('click', () => sheet.close());
-sheet.addEventListener('click', (e) => { if (e.target === sheet) sheet.close(); }); // tap the dimmed area
+document.querySelectorAll('[data-close]').forEach((b) => b.addEventListener('click', () => b.closest('dialog').close()));
+document.querySelectorAll('dialog').forEach((d) => d.addEventListener('click', (e) => {
+  if (e.target === d) d.close(); // tap the dimmed area
+}));
 
 // ---------- Navigation & chrome ----------
 function route() {
+  if (location.hash === '#signin') { // the private sign-in address
+    history.replaceState(null, '', location.pathname + location.search); // don't reopen on refresh
+    if (!LOCAL && !githubKey) openSignin();
+  }
   const view = location.hash === '#grinder' ? 'grinder' : 'brews';
   $('#view-brews').hidden = view !== 'brews';
   $('#view-grinder').hidden = view !== 'grinder';
@@ -175,10 +302,7 @@ function route() {
 addEventListener('hashchange', route);
 addEventListener('scroll', () => $('.bar').classList.toggle('scrolled', scrollY > 0), { passive: true });
 
-$('#new-brew').hidden = !editable;
 route();
 convert();
-fetch('brews.json', { cache: 'no-store' })
-  .then((r) => (r.ok ? r.json() : []))
-  .catch(() => [])
-  .then((data) => { brews = data; render(); });
+applyEditMode();
+loadBrews().then((data) => { brews = data; render(); });

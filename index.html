@@ -4,8 +4,22 @@
   <meta charset="utf-8">
   <meta name="viewport" content="width=device-width, initial-scale=1">
   <meta name="color-scheme" content="light dark">
+  <!-- Only this site's own files may run, and only GitHub's API may be contacted. This keeps the sign-in key safe from injected scripts. -->
+  <meta http-equiv="Content-Security-Policy" content="default-src 'none'; script-src 'self'; style-src 'self'; img-src 'self'; manifest-src 'self'; connect-src 'self' https://api.github.com; base-uri 'none'; form-action 'none'">
   <title>Coffee Journal</title>
-  <link rel="icon" href="data:image/svg+xml,<svg xmlns='http://www.w3.org/2000/svg' viewBox='0 0 100 100'><text y='.9em' font-size='90'>☕</text></svg>">
+  <meta name="description" content="My specialty coffee experiments: coffee, roaster, water, temperature, grind and how it tasted. Plus a KINGrinder K6 ↔ Comandante C40 grind converter.">
+  <!-- Link previews when the URL is shared -->
+  <meta property="og:type" content="website">
+  <meta property="og:title" content="Coffee Journal">
+  <meta property="og:description" content="My specialty coffee experiments, plus a KINGrinder K6 ↔ Comandante C40 grind converter.">
+  <meta property="og:url" content="https://saifmandour.github.io/coffee-journal/">
+  <meta property="og:image" content="https://saifmandour.github.io/coffee-journal/icon-512.png">
+  <!-- Phone: browser bar colour, home-screen icon and app -->
+  <meta name="theme-color" content="#f5f5f7" media="(prefers-color-scheme: light)">
+  <meta name="theme-color" content="#000000" media="(prefers-color-scheme: dark)">
+  <link rel="icon" href="icon.svg" type="image/svg+xml">
+  <link rel="apple-touch-icon" href="apple-touch-icon.png">
+  <link rel="manifest" href="manifest.webmanifest">
   <link rel="stylesheet" href="style.css">
   <script src="app.js" defer></script>
 </head>
@@ -65,6 +79,11 @@
     </section>
   </main>
 
+  <footer class="foot" id="owner" hidden>
+    Signed in on this device. Edits save to GitHub and show up for everyone in about a minute.
+    <button type="button" class="btn plain" id="signout">Sign out</button>
+  </footer>
+
   <dialog class="sheet" id="sheet" aria-labelledby="sheet-title">
     <form id="brew-form">
       <header class="sheet-head">
@@ -119,6 +138,25 @@
         </label>
         <p class="error wide" id="form-error" role="alert" hidden></p>
         <button type="button" class="btn danger wide" id="delete" hidden>Delete brew</button>
+      </div>
+    </form>
+  </dialog>
+
+  <!-- Owner sign-in: opened only via the private address …/#signin, never linked on the page -->
+  <dialog class="sheet" id="signin" aria-labelledby="signin-title">
+    <form id="signin-form">
+      <header class="sheet-head">
+        <button type="button" class="btn plain" data-close>Cancel</button>
+        <h2 id="signin-title">Owner sign-in</h2>
+        <button type="submit" class="btn plain strong">Sign in</button>
+      </header>
+      <div class="sheet-body">
+        <p class="note wide">Paste your GitHub key for this journal. It's saved on this device only, so you only do this once per device.</p>
+        <label class="field wide">GitHub key
+          <input name="key" type="password" required autofocus autocomplete="current-password" placeholder="github_pat_…"
+                 spellcheck="false" autocapitalize="off">
+        </label>
+        <p class="error wide" id="signin-error" role="alert" hidden></p>
       </div>
     </form>
   </dialog>

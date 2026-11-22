@@ -71,7 +71,7 @@ function card(b) {
   $('.roaster', li).textContent = b.roaster || '';
   const date = $('.date', li);
   date.dateTime = b.date;
-  date.textContent = new Date(`${b.date}T00:00`).toLocaleDateString(undefined, { day: 'numeric', month: 'short', year: 'numeric' });
+  date.textContent = formatDate(b.date);
   $('.method', li).textContent = [b.method, b.waterType].filter(Boolean).join(' · ');
 
   const stat = (name, main, sub) => {
@@ -95,13 +95,30 @@ function card(b) {
   return li;
 }
 
+const formatDate = (iso) => new Date(`${iso}T00:00`).toLocaleDateString(undefined, { day: 'numeric', month: 'short', year: 'numeric' });
+
+// ---------- Search ----------
+// Matches everything written on a card. Every word must match, and accents don't matter ("cafe" finds "Café").
+const fold = (text) => text.normalize('NFD').replace(/\p{Diacritic}/gu, '').toLowerCase();
+function matches(b, query) {
+  const text = fold([b.coffee, b.roaster, b.method, b.waterType, b.notes, GRINDERS[b.grinder || 'k6'],
+    b.date, formatDate(b.date)].filter(Boolean).join(' '));
+  return fold(query).split(/\s+/).filter(Boolean).every((word) => text.includes(word));
+}
+$('#search').addEventListener('input', () => render());
+
 // Newest date first. Same-day brews: the one logged last comes first.
 const newestFirst = () => [...brews].reverse().sort((a, b) => b.date.localeCompare(a.date));
 
 function render() {
-  $('#brews').replaceChildren(...newestFirst().map(card));
-  $('#empty').hidden = brews.length > 0;
-  $('#empty').textContent = canEdit() ? 'No brews yet. Tap New brew to log your first one.' : 'No brews logged yet.';
+  const query = $('#search').value.trim();
+  const shown = newestFirst().filter((b) => matches(b, query));
+  $('#brews').replaceChildren(...shown.map(card));
+  $('#search-wrap').hidden = brews.length === 0;
+  $('#empty').hidden = shown.length > 0;
+  $('#empty').textContent = brews.length
+    ? `No brews match “${query}”.`
+    : canEdit() ? 'No brews yet. Tap New brew to log your first one.' : 'No brews logged yet.';
   // Roasters you've used before show up as suggestions in the Roaster field.
   const roasters = [...new Set(brews.map((b) => b.roaster).filter(Boolean))].sort((a, b) => a.localeCompare(b));
   $('#roasters').replaceChildren(...roasters.map((r) => new Option(r)));

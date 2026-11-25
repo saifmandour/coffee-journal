@@ -13,5 +13,20 @@
     "grind": 105,
     "time": "2:45",
     "notes": "sweet, bright, fruity \n\nEmi Fukahori method"
+  },
+  {
+    "id": "6fc92b08-ab5b-4485-89b2-0fa1fa91a4a2",
+    "coffee": "Ethopia, Shantawene",
+    "roaster": "La Cabra",
+    "date": "2026-11-25",
+    "method": "V60 Switch",
+    "dose": 14,
+    "water": 200,
+    "waterType": "Bottled Water",
+    "temp": 94,
+    "grinder": "k6",
+    "grind": 100,
+    "time": "3:05",
+    "notes": "Was overextracted. Needs to go Corser next time. Sadly notes overcrowded by bitterness"
   }
 ]

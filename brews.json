@@ -58,5 +58,20 @@
     "grind": 110,
     "time": "2:20",
     "notes": "bright and clear. Quite good, a little watery. \nNext time a bit finer grind should be tried."
+  },
+  {
+    "id": "38ae8206-10e4-46a2-8132-1d4d2e77be91",
+    "coffee": "Kenya, Kiangoi",
+    "roaster": "La Cabra",
+    "date": "2026-11-25",
+    "method": "Areopress",
+    "dose": 14,
+    "water": 200,
+    "waterType": "Bottled Water",
+    "temp": 95,
+    "grinder": "c40",
+    "grind": 30,
+    "time": "2:45",
+    "notes": "fruity, sweet"
   }
 ]

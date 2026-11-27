@@ -30,21 +30,6 @@
     "notes": "Was overextracted. Needs to go Corser next time. Sadly notes overcrowded by bitterness"
   },
   {
-    "id": "76e7587a-55a0-4b47-846f-ec0c042c23ee",
-    "coffee": "Kenya",
-    "roaster": "La Cabra",
-    "date": "2026-11-26",
-    "method": "V60 Switch",
-    "dose": 14,
-    "water": 200,
-    "waterType": "Bottled Water",
-    "temp": 95,
-    "grinder": "k6",
-    "grind": 110,
-    "time": "2:20",
-    "notes": "Well Balanced cup and fruity. Is tiny bit watery, but that can be changed a by a few clicks to the finer side."
-  },
-  {
     "id": "41bda534-9c27-4bda-9908-d6b83ff10b24",
     "coffee": "Ethopia, Shantawene",
     "roaster": "La Cabra",
@@ -73,5 +58,20 @@
     "grind": 30,
     "time": "2:45",
     "notes": "fruity, sweet"
+  },
+  {
+    "id": "76e7587a-55a0-4b47-846f-ec0c042c23ee",
+    "coffee": "Kenya, Kiangoi",
+    "roaster": "La Cabra",
+    "date": "2026-11-26",
+    "method": "V60 Switch",
+    "dose": 14,
+    "water": 200,
+    "waterType": "Bottled Water",
+    "temp": 95,
+    "grinder": "k6",
+    "grind": 110,
+    "time": "2:20",
+    "notes": "Well Balanced cup and fruity. Is tiny bit watery, but that can be changed a by a few clicks to the finer side."
   }
 ]

@@ -43,5 +43,20 @@
     "grind": 110,
     "time": "2:20",
     "notes": "Well Balanced cup and fruity. Is tiny bit watery, but that can be changed a by a few clicks to the finer side."
+  },
+  {
+    "id": "41bda534-9c27-4bda-9908-d6b83ff10b24",
+    "coffee": "Ethopia, Shantawene",
+    "roaster": "La Cabra",
+    "date": "2026-11-27",
+    "method": "V60 Switch",
+    "dose": 14,
+    "water": 200,
+    "waterType": "Bottled Water",
+    "temp": 95,
+    "grinder": "k6",
+    "grind": 110,
+    "time": "2:20",
+    "notes": "bright and clear. Quite good, a little watery, next time a bit finer"
   }
 ]
